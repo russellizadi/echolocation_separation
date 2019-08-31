@@ -1,4 +1,4 @@
-# Separation in mixtures of bat acholocations
+# Echolocation Separation
 
 #### Using the masking algorithm
 ``` bash
