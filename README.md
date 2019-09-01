@@ -2,7 +2,7 @@
 
 #### Using the masking algorithm
 ``` bash
-python 
+python sources.py
 ```
 #### Using the detection model
 
