@@ -16,12 +16,19 @@ To randomly mix all the sources, run the following command:
 ```bash
 python mixtures.py CFG_MIXTURE
 ```
-#### Using the detection model
 
-#### Training and evaluating a model
-If you have a pretrained model, you can skip this part. After mixing sources, change the `CFG_EVALUATE` in the `settings` folder and set `name_mixtures` to the appropriate folder name containing train and test mixtures. You can set the number of folds through the `num_folds` variable.
+#### Training a model
+If you have a pretrained model, you can skip this part. After mixing sources, change the `CFG_MODEL` in the `settings` folder and set `name_mixtures` to the appropriate folder name containing train and test mixtures. You can set the number of folds through the `num_folds` variable. Set `num_epochs` and `len_batch` variables for the number of epochs and the batch size.  
 
 To train and test a model, run the following command:
+```bash
+python train.py CFG_MODEL
 ```
 
+#### Using a separation model
+If you have a pretrained model at `results` folder, set the variable `name_model` at the config file `CFG_SEPARATE`. 
+
+To separate all the files in the folder `path_mixtures`, run the following command:
+```bash
+python separate.py CFG_SEPARATE
 ```
