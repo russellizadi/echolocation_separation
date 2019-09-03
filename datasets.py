@@ -49,9 +49,7 @@ class Dataset:
             # frames
             i_frame = 0
             while True:
-
                 frame = np.arange(i_frame*len_hop, i_frame*len_hop + len_source)
-
                 if frame[-1] > len(amplitude):
                     break
                 self.amplitude = amplitude[frame]
@@ -59,7 +57,7 @@ class Dataset:
                 self_i = ut.labels(self, args)
                 for j_self, self_j in enumerate(self_i):
                     # source
-                    if not self_j.is_noise:
+                    if not self_j.is_noise and num_sources < args.num_sources_max:
                         self = self_j
                         self.name = '{}_{}_{}'.format(path_file.split('/')[-1].split('.')[0], i_frame, j_self)
 
@@ -92,8 +90,11 @@ class Dataset:
                             ut.plot_image(self.image, args)
                         break
                 i_frame += 1
-            args.logger.info("number of sources: {}".format(num_sources))
-        args.logger.info("extracting sources ended")
+                args.logger.info("frame: {}, number of sources: {}, and noises: {}".format(i_frame, num_sources, num_noises))
+                if num_noises >= args.num_sources_max:
+                    break
+            args.logger.info("total number of sources: {}".format(num_sources))
+        args.logger.info("extracting sources ended.")
 
 class NIPS4Bplus(Dataset):
     def __init__(self, args):

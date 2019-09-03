@@ -1,16 +1,19 @@
 #!/usr/bin/env python
-import os
+import os, sys
 import utils as ut
 
 # path setting
-name_script, name_suffix = os.path.basename(__file__).split('.')
-assert name_suffix == 'py', "Not a Python script!"
-PATH_SETTING = 'settings/{}.ini'.format(name_script)
+lst_args = sys.argv[1:]
+assert len(lst_args)==1, "Not a valid argument"
+_, name_suffix = lst_args[0].split('.')
+assert name_suffix == 'ini', "Not a valid config"
+path_setting = lst_args[0]
+assert os.path.exists(path_setting), "Config doesn't exists!"
 
 def main():
 
     # settings
-    args = ut.settings(PATH_SETTING)
+    args = ut.settings(path_setting)
 
     # save sources
     args.dataset.sources(args)

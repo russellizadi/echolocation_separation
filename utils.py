@@ -204,6 +204,7 @@ def mixer(mix, x, args):
     return mix
 
 def mixtures(args):
+    assert len(args.lst_path_sources) >= args.num_sources, "Not enough sources to mix!"
     for i_mixture in range(args.num_mixtures):
 
         path_noise = np.random.choice(args.lst_path_noises)
@@ -213,7 +214,6 @@ def mixtures(args):
         mixture.box = np.zeros([3, F, T])
         mixture.mask = np.empty([0, F, T])
         mixture.boxed = np.empty([0, F, T])
-        #lst_path_sources = np.random.choice(args.lst_path_sources, size=args.num_sources, replace=False)
 
         masks = np.zeros([1, F, T])
         num_sources = 0
@@ -297,15 +297,9 @@ def segment(m, b, args):
 
 def resize(x):
     F, T = x.shape
-    #box = np.zeros_like(x)
     l = np.where(x > 0)
-    #box[np.min(l[0]):np.max(l[0]), np.min(l[1]):np.max(l[1])] = 1
     box = x[np.min(l[0]):np.max(l[0]), np.min(l[1]):np.max(l[1])]
-    #print(box.shape)
     y = scipy.misc.imresize(box, size=[F, T]).astype(float)
-    #y /= np.max(y)
-    #print(np.min(y))
-    #print(np.max(y))
     return y
 
 def unresize(x, b):
@@ -317,53 +311,6 @@ def unresize(x, b):
     y[np.min(l[0]):np.max(l[0]), np.min(l[1]):np.max(l[1])] = m
     y = normalize(y)
     return y
-
-def inference_unary(m, args):
-    F, T = m.shape
-    d = dcrf.DenseCRF2D(T, F, 2)
-
-    probs = np.tile(m[np.newaxis,:,:],(2,1,1))
-    probs[0,:,:] = 1 - probs[1,:,:]
-    U = unary_from_softmax(probs)
-    d.setUnaryEnergy(U)
-
-    Q = d.inference(10)
-    map_soln = np.argmax(Q, axis=0)
-    return map_soln.reshape((F,T))
-
-def inference_bilateral(x, y, args):
-    F, T = x.shape
-    d = dcrf.DenseCRF2D(T, F, 2)
-
-    probs = np.tile(y[np.newaxis,:,:],(2,1,1))
-    probs[0,:,:] = 1 - probs[1,:,:]
-    U = unary_from_softmax(probs)
-    d.setUnaryEnergy(U)
-
-    pairwise_energy = create_pairwise_bilateral(sdims=(5,5),
-        schan=(0.1,), img=x[:, :, np.newaxis], chdim=2)
-    d.addPairwiseEnergy(pairwise_energy, compat=1)
-
-    Q = d.inference(20)
-    map_soln = np.argmax(Q, axis=0)
-    return map_soln.reshape((F,T))
-
-def inference_gaussian(x, y, args):
-    F, T = x.shape
-    d = dcrf.DenseCRF2D(T, F, 2)
-
-    probs = np.tile(y[np.newaxis,:,:],(2,1,1))
-    probs[0,:,:] = 1 - probs[1,:,:]
-    U = unary_from_softmax(probs)
-    d.setUnaryEnergy(U)
-
-    pairwise_energy = create_pairwise_gaussian(sdims=(10, 10), shape=(T, F))
-    d.addPairwiseEnergy(pairwise_energy, compat=.1)
-
-    Q = d.inference(50)
-    map_soln = np.argmax(Q, axis=0)
-    return map_soln.reshape((F,T))
-
 
 def save_mask(args):
     args.path_pkl = os.path.join(args.path_results, 'mask.pkl')
