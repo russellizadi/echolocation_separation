@@ -26,7 +26,7 @@ python train.py CFG_MODEL
 ```
 
 #### Using a separation model
-If you have a pretrained model at `results` folder, set the variable `name_model` at the config file `CFG_SEPARATE`. 
+If you have a pretrained model at `results` folder, set the variable `name_model` at the config file `CFG_SEPARATE`. Also, you may need to set the `i_fold` if you have multiple pretrained models with the same config. The variables `thr_det` and `thr_seg` are detection and segmentation thresholds respectively.  
 
 To separate all the files in the folder `path_mixtures`, run the following command:
 ```bash
