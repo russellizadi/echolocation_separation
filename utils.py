@@ -69,8 +69,6 @@ def active(x, args):
     y = np.array(x >= args.thr_act, dtype=np.float32)
     return y
 
-
-
 def settings(path):
     """
     read setting files .ini
@@ -336,7 +334,8 @@ def evaluate(args):
     Returns
     """
     metric = {}
-    lst_path_mixtures = lst_path_endswith(args.path_mixtures, '.pkl')
+    lst_path_mixtures = lst_path_endswith(args.path_sources_, '.pkl')
+    #print(lst_path_mixtures)
     for path_mixture in lst_path_mixtures:
         x = load_pkl(path_mixture)
         metric = metric_update(x, metric, args)

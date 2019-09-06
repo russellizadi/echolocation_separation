@@ -12,33 +12,46 @@ path_setting = lst_args[0]
 assert os.path.exists(path_setting), "Config doesn't exist!"
 
 def main():
+    
     # settings
     args = ut.settings(path_setting)
     lst_metric = []
     lst_name_metric = ['mdFs', 'mdFNRs', 'mdFb', 'mdTPRb', 'mdFNRb', 'msFs', 'msFNRs', 'msFb', 'msTPRb', 'msFPRb']
 
     for i_fold in range(args.num_folds):
+
+        args.i_fold = i_fold
         # if not trained
         args.path_mixtures = os.path.join('results', args.name_mixtures, 'train{}'.format(i_fold))
-        args.i_fold = i_fold
+        
         args.name_model = "{}_{}".format(args.name_setting, i_fold)
-        args.path_model = os.path.join('results', args.name_setting)
-        args.path_pth = os.path.join(args.path_model, 'models', "{}.pth".format(args.name_model))
-
-        args.path_figures = os.path.join(args.path_model, 'figures')
+        args.path_model = os.path.join('results', args.name_setting, 'models')
+        args.path_pth = os.path.join(args.path_model, "{}.pth".format(args.name_model))
+        args.path_figures = os.path.join('results', args.name_setting, 'figures')
+        args.path_sources_ = os.path.join('results', args.name_setting, 'sources_')
+        
         path_mixtures = os.path.join('results', args.name_mixtures, 'test{}'.format(i_fold))
         lst_path_mixtures = ut.lst_path_endswith(path_mixtures, '.pkl')
         num_sources_ = 0
         assert len(lst_path_mixtures) != 0, "No test file exists"
         for path_mixture in lst_path_mixtures:
+            
             x = ut.load_pkl(path_mixture)
+            path_source_ = os.path.join(args.path_sources_, "{}.pkl".format(x.name))
+            
+            #if path_mixture.split("/")[-1].split(".")[0] == x.name and os.path.exists(args.path_pth):
+            
+            if os.path.exists(path_source_) and os.path.exists(args.path_pth):
+                args.logger.info("{} already exists".format(path_source_))    
+                continue 
             x = models.separate(x, args)
             num_sources_ += x.mask_.shape[0]
         args.path_model = os.path.join(args.path_models, args.name_model)
-        args.path_mixtures = args.path_model
+        args.path_mixtures = path_mixtures
 
         # evaluate
         metric = ut.evaluate(args)
+
         args.logger.info("Metrics of the fold: {}".format(i_fold))
         try:
             # JASA

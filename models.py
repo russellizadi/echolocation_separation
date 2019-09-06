@@ -29,10 +29,15 @@ def separate(x, args):
     # path model file and figures folder
     path_pth = args.path_pth
     path_figures = args.path_figures
-        # train
+    
+    # directories
+    ut.make_dir(args.path_sources_)
+    ut.make_dir(args.path_figures)
+    
+    # train
     if not os.path.isfile(path_pth):
         # loss folder
-        args.path_loss = os.path.join(args.path_model, 'loss')
+        args.path_loss = args.path_model
         ut.make_dir(args.path_loss)
         
         # initialize model 
@@ -131,10 +136,12 @@ def separate(x, args):
 
     x = segment(x, args)
 
-    args.path_pkl = os.path.join(args.path_model, x.name + '.pkl')
+    args.path_pkl = os.path.join(args.path_sources_, "{}.pkl".format(x.name))
     ut.save_pkl(x, args)
+    
+    args.path_fig = os.path.join(args.path_figures, "{}.png".format(x.name))
 
-    if hasattr(args, 'path_figures'):
+    if hasattr(args, 'path_figures') and hasattr(args, 'path_fig'):
         ut.plot_mixture(x, args)
     return x
 
