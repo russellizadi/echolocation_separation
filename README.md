@@ -32,3 +32,6 @@ To separate all the files with the suffix `name_format` and the sampling rate of
 ```bash
 python separate.py CFG_SEPARATE
 ```
+
+#### Monitoring the log
+For each the above experiments, there is a log file in the experiment folder within the `results` folder. 
