@@ -130,7 +130,7 @@ def separate(x, args):
     args.logger.info("model {} loaded".format(args.name_model))
 
     num_params = sum(p.numel() for p in args.model.parameters() if p.requires_grad)
-    args.logger.info("number of model's parameters: {}".format(num_params))
+    # args.logger.info("number of model's parameters: {}".format(num_params))
 
     x = detect(x, args)
 

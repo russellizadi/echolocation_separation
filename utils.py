@@ -127,8 +127,8 @@ def read(path, args):
 
 def labels(x, args):
     m = np.zeros_like(x.image)
-    len_frames_t = [int(x.image.shape[1]/pow(2, i)) for i in range(0, 4)]
-    len_frames_f = [int(x.image.shape[0]/pow(2, i)) for i in range(0, 1)]
+    len_frames_t = [int(x.image.shape[1]/pow(2, i)) for i in range(0, 6)]
+    len_frames_f = [int(x.image.shape[0]/pow(2, i)) for i in range(0, 4)]
     for len_frame_t in len_frames_t:
         for len_frame_f in len_frames_f:
             i_frames_t = librosa.util.frame(np.arange(x.image.shape[1]), len_frame_t, len_frame_t//2).T
@@ -136,7 +136,7 @@ def labels(x, args):
             for i_frame_t in i_frames_t:
                 for i_frame_f in i_frames_f:
                     x_windowed = x.image[np.ix_(i_frame_f, i_frame_t)]
-                    for args.thr_act in np.linspace(.4, .8, 5):
+                    for args.thr_act in np.linspace(.1, .9, 10):
                         m_windowed = active(x_windowed, args)
                         m_windowed = morphology.remove_small_objects(m_windowed.astype(np.bool), min_size=20)
                         l, n = ndimage.label(m_windowed)
@@ -707,6 +707,57 @@ def plot_mixture(x, args):
         fig.savefig(args.path_fig, bbox_inches='tight')
     plt.close()
 
+def plot_jasa(x, args):
+    F, T = x.shape
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif', serif='Times', size=15)
+
+    len_source = int(args.len_hop*(T-1))
+    len_source_ms = len_source/args.f_sampling*1000
+
+    fig, ax = plt.subplots()
+
+    im = ax.imshow(x, origin='lower', cmap=cm.Blues)
+ 
+    cb = fig.colorbar(im, pad=args.fig_pad, shrink=args.fig_shrink, fraction=args.fig_fraction)
+    cb.outline.set_visible(False)
+    axb = cb.ax
+
+    axb.set_xlabel("{0:.0f}".format(np.min(x)))
+    axt = axb.twiny()
+
+    axt.set_xlabel("{0:.0f}".format(np.max(x)))
+    axt.xaxis.set_ticks([])
+    axt.yaxis.set_ticks([])
+
+    axt.spines['top'].set_visible(False)
+    axt.spines['bottom'].set_visible(False)
+    axt.spines['right'].set_visible(False)
+    axt.spines['left'].set_visible(False)
+
+    ax.tick_params(axis='both', which='both', length=0, direction='in')
+
+    start, end = ax.get_xlim()
+    xticks = np.linspace(0, end, 5)
+    ax.set_xticks(xticks)
+    xtickslabels = ['{:.0f}'.format(s) for s in np.linspace(0, len_source_ms, len(xticks))]
+    ax.set_xticklabels(xtickslabels)
+
+    ax.set_xlabel('Time (ms)')
+
+    start, end = ax.get_ylim()
+    yticks = np.linspace(0, end, 5)
+    ax.set_yticks(yticks)
+    ytickslabels = ['{:.0f}'.format(s) for s in np.linspace(args.lst_f_range[0]/1e3, args.lst_f_range[1]/1e3, len(yticks))]
+    ax.set_yticklabels(ytickslabels)
+    ax.set_ylabel('Frequency (kHz)')
+
+    if hasattr(args, "fig_title"):
+        ax.set_title(args.fig_title)
+
+    if hasattr(args, 'path_fig'):
+        fig.savefig(args.path_fig, bbox_inches='tight')
+    plt.close()
 
 def plot_train_valid(train, valid, args):
     fig, ax = plt.subplots(figsize=(16, 16))
