@@ -136,7 +136,7 @@ def labels(x, args):
             for i_frame_t in i_frames_t:
                 for i_frame_f in i_frames_f:
                     x_windowed = x.image[np.ix_(i_frame_f, i_frame_t)]
-                    for args.thr_act in np.linspace(.1, .9, 10):
+                    for args.thr_act in np.linspace(.1, .9, 9):
                         m_windowed = active(x_windowed, args)
                         m_windowed = morphology.remove_small_objects(m_windowed.astype(np.bool), min_size=20)
                         l, n = ndimage.label(m_windowed)
@@ -203,6 +203,7 @@ def mixer(mix, x, args):
 
 def mixtures(args):
     assert len(args.lst_path_sources) >= args.num_sources, "Not enough sources to mix!"
+    print(args.lst_path_noises)
     for i_mixture in range(args.num_mixtures):
 
         path_noise = np.random.choice(args.lst_path_noises)
@@ -224,8 +225,8 @@ def mixtures(args):
                 mask_i_and_j = np.zeros_like(mixture.image)
                 mask_i_and_j[(mask==1) & (source.mask==1)] = 1
                 intersection = np.sum(mask_i_and_j)
-
-                if intersection > 10:
+                #print(intersection)
+                if intersection > 500:
                     do_mix = False
                     break
 
