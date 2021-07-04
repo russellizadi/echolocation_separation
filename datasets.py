@@ -33,7 +33,7 @@ class Dataset:
         args.logger.info("{} files found.".format(len(lst_path_files)))
 
         len_source = int(args.len_hop*(args.len_input-1))
-        len_hop = int(.9*len_source)
+        len_hop = int(.5*len_source)
 
         num_sources = 0
         num_noises = 0
@@ -43,16 +43,34 @@ class Dataset:
             # read
             amplitude = ut.read(path_file, args)
             len_amplitude = len(amplitude)
-            num_frames = 1 + int((len_amplitude - len_source) / len_hop)
-            args.logger.info("File: {}, length: {}, number of frames: {}".format(i_file, len_amplitude, num_frames))
+            #num_frames = 1 + int((len_amplitude - len_source) / len_hop)
+            
+
 
             # frames
-            i_frame = 0
-            while True:
-                frame = np.arange(i_frame*len_hop, i_frame*len_hop + len_source)
-                if frame[-1] > len(amplitude):
-                    break
-                self.amplitude = amplitude[frame]
+            if len(amplitude) < len_source:
+                num_frames = 0
+                continue
+            frames = librosa.util.frame(amplitude, len_source, len_hop)
+            num_frames = frames.shape[-1]
+            if num_frames == 0:
+                continue
+
+            
+
+            # loop over frames
+            for i_frame in range(num_frames):
+                self.amplitude = frames[:, i_frame]
+                #print(i_frame, self.amplitude.shape)
+
+            # i_frame = 0
+            # while True:
+                
+            #     frame = np.arange(i_frame*len_hop, i_frame*len_hop + len_source)
+            #     if frame[-1] > len(amplitude):
+            #         print("short", frame[-1], len(amplitude))
+            #         break
+            #     self.amplitude = amplitude[frame]
                 self.image = ut.image(self.amplitude, args)
                 self_i = ut.labels(self, args)
                 for j_self, self_j in enumerate(self_i):
@@ -89,11 +107,15 @@ class Dataset:
                             args.path_fig = os.path.join(path_figures, self.name + '.png')
                             ut.plot_image(self.image, args)
                         break
-                i_frame += 1
-                args.logger.info("frame: {}, number of sources: {}, and noises: {}".format(i_frame, num_sources, num_noises))
+                #i_frame += 1
+                #args.logger.info("frame: {}, number of sources: {}, and noises: {}".format(i_frame, num_sources, num_noises))
                 if num_noises >= args.num_sources_max:
                     break
-            args.logger.info("total number of sources: {}".format(num_sources))
+            # log
+            args.logger.info(
+                f"file: {i_file}, length: {len_amplitude}, # frames: {num_frames}, # sources: {num_sources}")
+
+            #args.logger.info("total number of sources: {}".format(num_sources))
         args.logger.info("extracting sources ended.")
 
 class NIPS4Bplus(Dataset):

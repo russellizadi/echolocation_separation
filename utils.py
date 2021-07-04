@@ -127,28 +127,34 @@ def read(path, args):
 
 def labels(x, args):
     m = np.zeros_like(x.image)
-    len_frames_t = [int(x.image.shape[1]/pow(2, i)) for i in range(0, 6)]
+    len_frames_t = [int(x.image.shape[1]/pow(2, i)) for i in range(0, 4)]
     len_frames_f = [int(x.image.shape[0]/pow(2, i)) for i in range(0, 4)]
     for len_frame_t in len_frames_t:
         for len_frame_f in len_frames_f:
-            i_frames_t = librosa.util.frame(np.arange(x.image.shape[1]), len_frame_t, len_frame_t//2).T
-            i_frames_f = librosa.util.frame(np.arange(x.image.shape[0]), len_frame_f, len_frame_f//2).T
+            i_frames_t = librosa.util.frame(
+                np.arange(x.image.shape[1]), len_frame_t, len_frame_t//2).T
+            i_frames_f = librosa.util.frame(
+                np.arange(x.image.shape[0]), len_frame_f, len_frame_f//2).T
             for i_frame_t in i_frames_t:
                 for i_frame_f in i_frames_f:
                     x_windowed = x.image[np.ix_(i_frame_f, i_frame_t)]
-                    for args.thr_act in np.linspace(.1, .9, 9):
+                    for args.thr_act in np.linspace(.1, .9, 20):
                         m_windowed = active(x_windowed, args)
-                        m_windowed = morphology.remove_small_objects(m_windowed.astype(np.bool), min_size=20)
+                        m_windowed = morphology.remove_small_objects(
+                            m_windowed.astype(np.bool), 
+                            min_size=20)
                         l, n = ndimage.label(m_windowed)
+                        #print(len_frame_t, len_frame_f, round(args.thr_act, 2), x.image.min(), x.image.max(), n)
                         if n==1:
                             l = np.where(m_windowed==1)
                             h = np.max(l[0]) - np.min (l[0]) + 1
                             w = np.max(l[1]) - np.min (l[1]) + 1
-                            if ((w*h > 2000)
-                                and (np.min(l[1]) > 1)
-                                and (np.max(l[1]) < m_windowed.shape[1]-1)
-                                and (np.min(l[0]) > 1)
-                                and (np.max(l[0]) < m_windowed.shape[0]-1)):
+                            #print(w*h, (np.min(l[1]) >= 1), (np.max(l[1]) <= m_windowed.shape[1]-1))
+                            if ((w*h > 1000)
+                                and (np.min(l[1]) >= 1)
+                                and (np.max(l[1]) <= m_windowed.shape[1]-1)
+                                and (np.min(l[0]) >= 1)
+                                and (np.max(l[0]) <= m_windowed.shape[0]-1)):
                                 m[np.ix_(i_frame_f, i_frame_t)] += m_windowed.astype(np.float)
                                 break
     m = np.clip(m, 0, 1)
@@ -203,7 +209,6 @@ def mixer(mix, x, args):
 
 def mixtures(args):
     assert len(args.lst_path_sources) >= args.num_sources, "Not enough sources to mix!"
-    print(args.lst_path_noises)
     for i_mixture in range(args.num_mixtures):
 
         path_noise = np.random.choice(args.lst_path_noises)
