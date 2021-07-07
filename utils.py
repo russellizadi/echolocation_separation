@@ -56,7 +56,6 @@ def update_df(obj, args):
     f_mel = librosa.mel_frequencies(
         args.dim_input, 
         fmax=f_sampling/2)
-    print(f_mel)
     l = np.where(obj.mask==1)
     h = np.max(l[0]) - np.min (l[0]) + 1
     w = np.max(l[1]) - np.min (l[1]) + 1
@@ -64,7 +63,6 @@ def update_df(obj, args):
     duration = args.len_hop*w/float(f_sampling)
     f_min = f_mel[np.min(l[0])]
     f_max = f_mel[np.max(l[0])]
-    print(w, duration, f_min, f_max)
     args.df = args.df.append(
         {
             "path file": obj.path_file, 
@@ -127,7 +125,7 @@ def settings(path):
     args.device = torch.device('cuda:{}'.format(args.i_cuda) if torch.cuda.is_available() else 'cpu')
     args.logger.info('settings is read!')
 
-    args.path_df = os.path.join("results", f"{args.name_setting}.csv")
+    args.path_df = os.path.join("results", args.name_setting, f"{args.name_setting}.csv")
     args.df = pd.DataFrame()#columns=["path", "size"])
 
     return args
