@@ -7,7 +7,10 @@ For each of the following experiments, there is one python file `.py`. Associate
 ```bash
 source setup.sh
 ```
-2. 
+2. Extract the sources into a csv file:
+```
+python sources.py
+```
 
 #### Finding sources for a folder of recordings
 Before running the `sources.py` script, change the following variables in the `CFG_SOURCE` in the `settings` folder. `path_dataset` should contain a folder in name `name_dataset`. The masking algorithm runs over all the `wav` or `flac` files inside the folder `path-datasets/name_dataset`. Set the `num_sources_max` to number of needed sources.
