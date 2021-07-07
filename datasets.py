@@ -41,7 +41,8 @@ class Dataset:
         #
         for i_file, path_file in enumerate(lst_path_files):
             # read
-            amplitude = ut.read(path_file, args)
+            self.path_file = path_file
+            amplitude = ut.read(path_file)
             len_amplitude = len(amplitude)
             #num_frames = 1 + int((len_amplitude - len_source) / len_hop)
             
@@ -82,6 +83,9 @@ class Dataset:
                         args.path_pkl = os.path.join(args.path_sources, self.name + '.pkl')
                         ut.save_pkl(self, args)
                         num_sources += 1
+
+                        # add a row the df
+                        args = ut.update_df(self, args)
 
                         # plot
                         if 1:

@@ -2,6 +2,13 @@
 
 For each of the following experiments, there is one python file `.py`. Associated with each script, a config file `.ini` is available in the `settings` folder. Change the requiered config before running scripts. All results associated with each experiment will be in a folder inside the `results` folder with the same name as the config file.
 
+# Steps to extract binary mask from mixtures
+1.  Activate the environment:
+```bash
+source setup.sh
+```
+2. 
+
 #### Finding sources for a folder of recordings
 Before running the `sources.py` script, change the following variables in the `CFG_SOURCE` in the `settings` folder. `path_dataset` should contain a folder in name `name_dataset`. The masking algorithm runs over all the `wav` or `flac` files inside the folder `path-datasets/name_dataset`. Set the `num_sources_max` to number of needed sources.
 

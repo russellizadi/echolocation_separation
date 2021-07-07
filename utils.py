@@ -12,6 +12,7 @@ import skimage
 import skimage.segmentation
 import skimage.morphology
 import skimage.measure
+import pandas as pd
 from sklearn.metrics import pairwise_distances
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -49,6 +50,32 @@ def save_pkl(x, args):
 def load_pkl(path):
     with open(path, 'rb') as file:
         return pickle.load(file)
+
+def update_df(obj, args):
+    f_sampling = soundfile.info(obj.path_file).samplerate
+    f_mel = librosa.mel_frequencies(
+        args.dim_input, 
+        fmax=f_sampling/2)
+    print(f_mel)
+    l = np.where(obj.mask==1)
+    h = np.max(l[0]) - np.min (l[0]) + 1
+    w = np.max(l[1]) - np.min (l[1]) + 1
+
+    duration = args.len_hop*w/float(f_sampling)
+    f_min = f_mel[np.min(l[0])]
+    f_max = f_mel[np.max(l[0])]
+    print(w, duration, f_min, f_max)
+    args.df = args.df.append(
+        {
+            "path file": obj.path_file, 
+            "duration (ms)": 1000*duration,
+            "f min (kHz)": f_min/1000., 
+            "f max (kHz)": f_max/1000., 
+        }, 
+        ignore_index=True
+    )
+    args.df.to_csv(args.path_df)
+    return args
 
 def lst_dir_endswith(path, suffix):
     lst_path = []
@@ -99,6 +126,10 @@ def settings(path):
     args.dataset = getattr(datasets, args.name_dataset)(args)
     args.device = torch.device('cuda:{}'.format(args.i_cuda) if torch.cuda.is_available() else 'cpu')
     args.logger.info('settings is read!')
+
+    args.path_df = os.path.join("results", f"{args.name_setting}.csv")
+    args.df = pd.DataFrame()#columns=["path", "size"])
+
     return args
 
 def logger(args):
@@ -117,10 +148,12 @@ def normalize(x):
     x /= np.max(x)
     return x
 
-def read(path, args):
+def read(path, args=None):
     endswith = path.split('.')[1]
     if endswith=='wav':
-        amplitude, _ = librosa.load(path, sr=args.f_sampling)
+        amplitude, _ = librosa.load(
+            path, 
+            sr=soundfile.info(path).samplerate)
     elif endswith=='flac':
         amplitude, _ = soundfile.read(path)
     return amplitude
